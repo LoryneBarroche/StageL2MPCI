@@ -66,8 +66,6 @@ defined by its coordinate. *)
 
 Inductive cell:= C : Z -> Z -> cell.
 
-Definition configuration := cell -> tile.
-
 
 (* So far, we say that colors are compatible if equal,
  but this might not be general enough afterwards. *)
@@ -132,19 +130,13 @@ Inductive neighbour_spec: cell -> cell-> option side -> Type:=
 
 Lemma Zeq_is_neq_zeq_false : forall x y, x <> y -> (x =z= y) = false. 
 Proof. 
-  intros. assert (x = y <->  (x =z= y) = true).
-  exact (Zeq_is_eq_bool x y). destruct (x =z= y). 
-  - destruct H0. edestruct H. apply H1. auto. 
-  - auto.
+  intros. apply Z.eqb_neq. exact H.
 Qed.
 
+
 Lemma Zeq_is_eq_zeq_true : forall x y, x = y -> (x =z= y) = true. 
-Proof. 
-  intros.
-  assert (x = y <->  (x =z= y) = true).
-  exact (Zeq_is_eq_bool x y). destruct (x =z= y). 
-  - auto. 
-  -  destruct H0. apply H0. auto.
+Proof.
+intros. apply Z.eqb_eq. exact H.
 Qed.
 
 Lemma neighbourP:
@@ -173,16 +165,69 @@ Proof.
     rewrite (Zeq_is_eq_zeq_true (x2) (Z.succ x1)) in n1.
     rewrite (Zeq_is_eq_zeq_true (y2) (y1)) in n1.
     discriminate. 
-    auto. auto. 
-+ Admitted.
+    exact H0.
+    exact H. 
+    + intro. destruct H. 
+    rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n0.
+    rewrite (Zeq_is_eq_zeq_true (y2) (Z.pred y1)) in n0. 
+    discriminate.
+    exact H0.
+    exact H.
+    + intro. destruct H.
+    rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n.
+    rewrite (Zeq_is_eq_zeq_true (y2) (Z.succ y1)) in n.
+    discriminate.
+    exact H0.
+    exact H. 
+Qed.
+
+Definition configuration := cell -> tile.
+
+Definition compatible (P : configuration) (C1 : cell) (C2 : cell) : bool :=
+  match neighbour C1 C2 with
+  | Some North => compatible_north (P C1) (P C2)
+  | Some South => compatible_south (P C1) (P C2)
+  | Some East => compatible_east (P C1) (P C2)
+  | Some West => compatible_west (P C1) (P C2)
+  | None => true
+  end.
 
 
-Definition compatible: (P :configuration) (C1 : cell) (C2 : Cell) : bool:=
-match neighbour C1 C2 with
-| Some North => compatible_right (T c) (T d)
-| Some South =>
-| Some East =>
-| Some West =>
-| None => true
-end. 
- 
+Definition tiling (P:configuration): Prop := 
+  forall C1 C2, compatible P C1 C2.
+
+Definition pattern := cell -> option tile. (* pk option tile déjà ?*)
+
+Definition view:= cell -> bool.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Definition conf_from_view : configuration -> view -> pattern:=
+    fun T view c => if view c then Some (T c) else None. 
+
+Definition conf_from_view (P : configuration) (view : view) (c : cell) : pattern:=
+    if view c then Some (P c) 
+    else None. 
+
+
+
+
+
+
+
