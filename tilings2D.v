@@ -9,12 +9,16 @@ From mathcomp Require Import seq. (* path fintype. *)
 
 (** * Definitions *)
 
+
+
+(*****************************************************************************)
+(************************************* In 2D *********************************)
+(*****************************************************************************)
+
+
+
 (** We define colors as natural numbers, and we set a few
     names to make things a bit more readable. *)
-
-Definition type_Dec (X: Type) := forall (x y : X), {x = y}+{x <> y}.
-
-Inductive colorX {X : Type}{p : type_Dec X} := ColorX: X -> colorX.
 
 
 Inductive color := Color: nat -> color.
@@ -29,17 +33,6 @@ Proof.
 Defined.
 
 
-Inductive color1D := Color1D: (list nat) -> color1D.
-
-
-(** The equality of colors is of course decidable. *)
-
-Definition color1D_eqb : color1D -> color1D -> bool.
-Proof.
-  intros t u. destruct t, u.
-  destruct (list_eq_dec Nat.eq_dec l l0).
-  exact true. exact false.
-Defined.
 
 Definition Black := Color 0.
 Definition White := Color 1.
@@ -49,19 +42,18 @@ Definition Blue  := Color 4.
 (* etc... *)
 
 
-(* Since we restrict ourselves to one dimensional tiles,
-   tiles will only have two sides. *)
+(* tiles will have four sides. *)
 
-Inductive side := North | West | East | South.
+Inductive side := North | West | South | East.
 
 Record tile := {
     north  : color;
     west  : color;
-    east : color;
     south : color;
+    east : color;
 }.
 
-(* A cell is just one place on the 1-dimensional line,
+(* A cell is just one place on the 2-dimensional space,
 defined by its coordinate. *)
 
 Inductive cell:= C : Z -> Z -> cell.
@@ -162,23 +154,23 @@ Proof.
       rewrite (Zeq_is_eq_zeq_true (y1) (y1)) in n2.
       simpl in n2. discriminate. auto. auto.
     + intro. destruct H. 
-    rewrite (Zeq_is_eq_zeq_true (x2) (Z.succ x1)) in n1.
-    rewrite (Zeq_is_eq_zeq_true (y2) (y1)) in n1.
-    discriminate. 
-    exact H0.
-    exact H. 
+      rewrite (Zeq_is_eq_zeq_true (x2) (Z.succ x1)) in n1.
+      rewrite (Zeq_is_eq_zeq_true (y2) (y1)) in n1.
+      discriminate. 
+      exact H0.
+      exact H. 
     + intro. destruct H. 
-    rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n0.
-    rewrite (Zeq_is_eq_zeq_true (y2) (Z.pred y1)) in n0. 
-    discriminate.
-    exact H0.
-    exact H.
+      rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n0.
+      rewrite (Zeq_is_eq_zeq_true (y2) (Z.pred y1)) in n0. 
+      discriminate.
+      exact H0.
+      exact H.
     + intro. destruct H.
-    rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n.
-    rewrite (Zeq_is_eq_zeq_true (y2) (Z.succ y1)) in n.
-    discriminate.
-    exact H0.
-    exact H. 
+      rewrite (Zeq_is_eq_zeq_true (x2) (x1)) in n.
+      rewrite (Zeq_is_eq_zeq_true (y2) (Z.succ y1)) in n.
+      discriminate.
+      exact H0.
+      exact H. 
 Qed.
 
 Definition configuration := cell -> tile.
@@ -241,4 +233,58 @@ Definition strong_periodic (P:configuration): Prop :=
 
 
 
+(****************************************************************************************)
+(**************************************** In 1D *****************************************)
+(****************************************************************************************)
+
+
+
+(* We define 1D tiles where colors are now of type list nat. *)
+
+
+Inductive color1D := Color1D: (list nat) -> color1D.
+
+
+(** The equality of colors is decidable also in 1D. *)
+
+Definition color1D_eqb : color1D -> color1D -> bool.
+Proof.
+  intros t u. destruct t, u.
+  destruct (list_eq_dec Nat.eq_dec l l0).
+  exact true. exact false.
+Defined.
+
+Inductive side1D := East1D | West1D.
+
+Record tile1D := {
+    west1D  : color1D;
+    east1D : color1D;
+}.
+
+Fixpoint length_list (l : list nat) :=
+match l with
+| nil => 0
+| cons a l1 => 1 + length_list l1
+end.
+
+Definition color1D_to_list (c : color1D) : list nat :=
+  match c with 
+  | Color1D l => l
+  end.
+
+Definition compatible_west1D : tile1D -> tile1D -> bool :=
+fun tile1 tile2 =>
+  andb
+    (color1D_eqb (west1D tile1) (east1D tile2))
+    (Nat.eqb
+      (length_list (color1D_to_list (west1D tile1)))
+      (length_list (color1D_to_list (east1D tile2)))).
+
+Definition compatible_east1D : tile1D -> tile1D -> bool :=
+fun tile1 tile2 =>
+  andb
+    (color1D_eqb (east1D tile1) (west1D tile2))
+    (Nat.eqb
+      (length_list (color1D_to_list (east1D tile1)))
+      (length_list (color1D_to_list (west1D tile2)))).
 
