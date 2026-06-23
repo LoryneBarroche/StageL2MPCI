@@ -193,28 +193,14 @@ Definition compatible (P : configuration) (C1 : cell) (C2 : cell) : bool :=
   end.
 
 
-Definition tiling (P:configuration): Prop := 
+Definition valid_tiling (P:configuration): Prop := 
   forall C1 C2, compatible P C1 C2.
 
+
+(*
 Definition pattern := cell -> option tile. (* pk option tile déjà ?*)
 
 Definition view:= cell -> bool.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -223,9 +209,34 @@ Definition view:= cell -> bool.
 
 Definition conf_from_view (P : configuration) (view : view) (c : cell) : pattern:=
     if view c then Some (P c) 
-    else None. 
+    else None. *)
+    
+Record vec := {
+  vx : Z;
+  vy : Z
+}.
 
+Definition translation (c : cell) (u : vec) (k : Z) : cell :=
+  match c with
+  | C x y =>
+      C (x + k * vx u) (y + k * vy u)
+  end.
 
+Definition weak_periodic (P:configuration): Prop :=
+  exists (u : vec), (vx u <> 0%Z)\/(vy u <> 0%Z) /\
+  (forall (c : cell), 
+  forall (k : Z), 
+  P (translation c u k) = P (c)).
+
+Definition strong_periodic (P:configuration): Prop :=
+  exists (u : vec), 
+  (vx u <> 0%Z)\/(vy u <> 0%Z) /\ (
+    exists (v : vec), 
+    ((vx v <> 0%Z)\/(vy v <> 0%Z) /\ 
+    ~(exists (a b : Z), ((a*(vx u) + b*vx v)%Z = 0%Z /\ (a*(vy u) + b*vy v)%Z = 0%Z))) /\ (
+      forall (c : cell), 
+      forall (k1 k2 : Z),
+        P (translation (translation c u k1) v k2) = P c)).
 
 
 
