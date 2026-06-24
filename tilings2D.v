@@ -409,7 +409,7 @@ Proof.
 Admitted.
 
 Lemma counter_example : forall P : configuration, is_VP (1,1) P 
--> (forall a, not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
+-> (forall a, a <> 0 -> not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
 Proof.
 Admitted.
 
