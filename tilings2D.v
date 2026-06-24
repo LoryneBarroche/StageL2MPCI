@@ -69,6 +69,7 @@ Definition compatible_color : color -> color -> bool:=
 Transparent compatible_color.
 Hint Unfold compatible_color.
 
+Definition un_vec : vecI := (1,1).
 Definition compatible_north : tile -> tile -> bool:=
 fun tile1 tile2 => color_eqb (@north tile1) (@south tile2).
 
@@ -366,5 +367,51 @@ Definition valid_tiling1D (P:configuration1D): Prop :=
   forall C1 C2, compatible1D P C1 C2.
 
 
+      
+(****************************************************************************************)
+(**********************************Counter example***************************************)
+(****************************************************************************************)
+
+Definition vecI : Set := Z * Z. 
+
+
+Definition translationI (c : cell) (u : vecI) (k : Z) : cell :=
+  match c with
+  | C x y =>
+      C (x + k * u.1) (y + k * u.2)
+  end.
+
+Definition is_VP (v:vecI) (P: configuration) :=   
+  forall c,  forall k,  P (translationI c v k) = P c.
+
+Definition plus_vec (u v : vecI) : vecI := (u.1 + v.1, u.2 + v.2).
+
+Notation "u + v" := (plus_vec u v).
+
+Lemma translationI_sum : forall c u v k, translationI c (u + v) k 
+= translationI (translationI c u k) v k.
+Proof. 
+Admitted.
+
+Lemma sum_VP : forall P u v, is_VP u P -> is_VP v P -> is_VP (u + v) P.
+Proof.
+Admitted.
+
+Definition mult_vec (k:Z) (u : vecI) : vecI := (k * u.1,k * u.2).
+
+Notation "k * u" := (mult_vec k u).
+
+Lemma translationI_prod : forall c u k' k, translationI c (k'*u) k = translationI c u (k * k').
+Proof. 
+Admitted.
+
+Lemma prod_VP : forall P u k, is_VP u P -> is_VP (k * u) P.
+Proof.
+Admitted.
+
+Lemma counter_example : forall P : configuration, is_VP (1,1) P 
+-> (forall a, not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
+Proof.
+Admitted.
 
 
