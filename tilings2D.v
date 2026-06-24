@@ -6,6 +6,7 @@ From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat.
 From mathcomp Require Import seq. (* path fintype. *)
 (* From mathcomp Require Import fingraph. *)
 
+Open Scope Z_scope. (* wahou ça change la vie !*)
 
 (** * Definitions *)
 
@@ -215,17 +216,17 @@ Definition translation (c : cell) (u : vec) (k : Z) : cell :=
   end.
 
 Definition weak_periodic (P:configuration): Prop :=
-  exists (u : vec), (vx u <> 0%Z)\/(vy u <> 0%Z) /\
+  exists (u : vec), (vx u <> 0)\/(vy u <> 0) /\
   (forall (c : cell), 
   forall (k : Z), 
   P (translation c u k) = P (c)).
 
 Definition strong_periodic (P:configuration): Prop :=
   exists (u : vec), 
-  (vx u <> 0%Z)\/(vy u <> 0%Z) /\ (
+  (vx u <> 0)\/(vy u <> 0) /\ (
     exists (v : vec), 
-    ((vx v <> 0%Z)\/(vy v <> 0%Z) /\ 
-    ~(exists (a b : Z), ((a*(vx u) + b*vx v)%Z = 0%Z /\ (a*(vy u) + b*vy v)%Z = 0%Z))) /\ (
+    ((vx v <> 0)\/(vy v <> 0) /\ 
+    ~(exists (a b : Z), ((a*(vx u) + b*vx v) = 0 /\ (a*(vy u) + b*vy v) = 0))) /\ (
       forall (c : cell), 
       forall (k1 k2 : Z),
         P (translation (translation c u k1) v k2) = P c)).
@@ -254,14 +255,15 @@ Proof.
   exact true. exact false.
 Defined.
 
-Inductive side1D := East1D | West1D.
+Inductive side1D :=  West1D | East1D.
 
 Record tile1D := {
-    west1D  : color1D;
     east1D : color1D;
+    west1D  : color1D;
+    length1D : nat;
 }.
 
-Fixpoint length_list (l : list nat) :=
+Fixpoint length_list (l : list nat) : nat :=
 match l with
 | nil => 0
 | cons a l1 => 1 + length_list l1
@@ -274,17 +276,95 @@ Definition color1D_to_list (c : color1D) : list nat :=
 
 Definition compatible_west1D : tile1D -> tile1D -> bool :=
 fun tile1 tile2 =>
-  andb
-    (color1D_eqb (west1D tile1) (east1D tile2))
-    (Nat.eqb
-      (length_list (color1D_to_list (west1D tile1)))
-      (length_list (color1D_to_list (east1D tile2)))).
+  andb 
+  (
+    andb
+      (color1D_eqb (west1D tile1) (east1D tile2))
+      (Nat.eqb
+        (length_list (color1D_to_list (west1D tile1)))
+        (length_list (color1D_to_list (east1D tile2))))
+  )
+  (Nat.eqb
+    (length1D tile1)
+    (length1D tile2)).
 
 Definition compatible_east1D : tile1D -> tile1D -> bool :=
 fun tile1 tile2 =>
-  andb
-    (color1D_eqb (east1D tile1) (west1D tile2))
-    (Nat.eqb
-      (length_list (color1D_to_list (east1D tile1)))
-      (length_list (color1D_to_list (west1D tile2)))).
+  andb 
+  (
+    andb
+      (color1D_eqb (east1D tile1) (west1D tile2))
+      (Nat.eqb
+        (length_list (color1D_to_list (east1D tile1)))
+        (length_list (color1D_to_list (west1D tile2))))
+  )
+  (Nat.eqb
+    (length1D tile1)
+    (length1D tile2)).
+
+(* les cellules ici sont un intervalle de Z le longueur length1D \in nat*)
+(* on choisit par défaut que la coordonnée x est sur la première case de l'intervalle
+donc x1 + n1 nous donne la coordonnée x2 de la cellule suivante et x1 - n0 nous donne
+celle de la précédente, x0. *)
+    
+Inductive cell1D:= C1D : Z -> nat -> cell1D.
+
+
+Definition neighbour1D: cell1D -> cell1D -> option side1D:=
+ fun c d =>
+    match c with
+    | C1D x1 n1 =>
+        match d with
+        | C1D x2 n2 =>
+            if  (x2 =z= x1 - Z.of_nat(n2))
+              then Some West1D
+            else
+              if (x2 =z= x1 + Z.of_nat(n1))
+                then Some East1D
+            else
+              None
+        end 
+    end.
+
+
+Inductive neighbour1D_spec: cell1D -> cell1D-> option side1D -> Type:=
+|Neighbour1D_west (x1 x2 : Z) (n1 n2 : nat) (p:x2 = x1 - Z.of_nat(n2)): neighbour1D_spec (C1D x1 n1) (C1D x2 n2) (Some West1D)
+|Neighbour1D_east (x1 x2 : Z) (n1 n2 : nat) (p:x2 = x1 + Z.of_nat(n1)): neighbour1D_spec (C1D x1 n1) (C1D x2 n2) (Some East1D)
+|Neighbour1D_none (x1 x2 : Z) (n1 n2 : nat)
+(p : not (x2 = x1 - Z.of_nat(n2)))
+(q : not(x2 = x1 + Z.of_nat(n1))): neighbour1D_spec (C1D x1 n1) (C1D x2 n2) None.
+
+Lemma neighbour1DP:
+  forall c1 c2, neighbour1D_spec c1 c2 (neighbour1D c1 c2).
+Proof.
+intros. destruct c1 as [x1 n1]. destruct c2 as [x2 n2]. unfold neighbour1D.
+  - case:ifP. intro. 
+  apply Z.eqb_eq in i. apply Neighbour1D_west. exact i.
+  - case:ifP. intros.
+  apply Z.eqb_eq in i. apply Neighbour1D_east. exact i.
+  - intros. apply Neighbour1D_none. 
+    + apply Z.eqb_neq in n0. exact n0.
+    + apply Z.eqb_neq in n. exact n.
+Qed.
+
+
+Definition configuration1D := cell1D -> tile1D.
+
+Definition valid_configuration1D (P : configuration1D) : Prop :=
+  forall x n,
+    length1D (P (C1D x n)) = n.
+
+Definition compatible1D (P : configuration1D) (C1 C2 : cell1D) : bool :=
+  match neighbour1D C1 C2 with
+  | Some East1D => compatible_east1D (P C1) (P C2)
+  | Some West1D => compatible_west1D (P C1) (P C2)
+  | None => true
+  end. 
+
+
+Definition valid_tiling1D (P:configuration1D): Prop := 
+  forall C1 C2, compatible1D P C1 C2.
+
+
+
 
