@@ -427,3 +427,19 @@ Lemma counter_example : forall P : configuration, is_VP (1,1) P
 Proof.
 intros. intro. unfold is_VP in H2. 
 Admitted.
+
+(** next goal**)
+      (*I took your definition of strong periodicity that I barely changed*)
+Definition SP (P:configuration): Prop :=
+  exists u, u <> (0,0) /\ 
+    exists v, 
+      v <> (0,0) /\ (v.2 *  u.1 -  u.2 *  v.1 <> 0) /\ 
+       is_VP u P /\ is_VP v P.
+
+Lemma addprod_VP : forall P u v k, is_VP u P -> is_VP v P -> is_VP (u + k *v) P.
+      
+Lemma SP_to_VP : forall P, SP P -> exists a, a<> 0 /\ is_VP (a,0) P.
+
+Admitted.
+
+
