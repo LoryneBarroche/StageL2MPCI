@@ -69,7 +69,6 @@ Definition compatible_color : color -> color -> bool:=
 Transparent compatible_color.
 Hint Unfold compatible_color.
 
-Definition un_vec : vecI := (1,1).
 Definition compatible_north : tile -> tile -> bool:=
 fun tile1 tile2 => color_eqb (@north tile1) (@south tile2).
 
