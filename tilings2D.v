@@ -390,27 +390,40 @@ Notation "u + v" := (plus_vec u v).
 Lemma translationI_sum : forall c u v k, translationI c (u + v) k 
 = translationI (translationI c u k) v k.
 Proof. 
-Admitted.
+intros. destruct c as [x y]. destruct u as [u1 u2]. destruct v as [v1 v2].
+unfold translationI. simpl.
+rewrite Z.mul_add_distr_l. rewrite Z.mul_add_distr_l.
+rewrite Z.add_assoc. rewrite Z.add_assoc.
+reflexivity.
+Qed.
 
 Lemma sum_VP : forall P u v, is_VP u P -> is_VP v P -> is_VP (u + v) P.
 Proof.
-Admitted.
+intros.
+unfold is_VP. intros.
+rewrite translationI_sum.
+unfold is_VP in H. rewrite H0. rewrite H. reflexivity.
+Qed.
 
 Definition mult_vec (k:Z) (u : vecI) : vecI := (k * u.1,k * u.2).
 
 Notation "k * u" := (mult_vec k u).
 
 Lemma translationI_prod : forall c u k' k, translationI c (k'*u) k = translationI c u (k * k').
-Proof. 
-Admitted.
+Proof.
+intros. destruct c as [x y]. destruct u as [u1 u2].
+unfold translationI. simpl.
+rewrite Z.mul_assoc. rewrite Z.mul_assoc. reflexivity.
+Qed.
 
 Lemma prod_VP : forall P u k, is_VP u P -> is_VP (k * u) P.
 Proof.
-Admitted.
+intros. unfold is_VP. intros.
+unfold is_VP in H. rewrite translationI_prod. rewrite H. reflexivity.
+Qed.
 
 Lemma counter_example : forall P : configuration, is_VP (1,1) P 
 -> (forall a, a <> 0 -> not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
 Proof.
+intros. intro. unfold is_VP in H2. 
 Admitted.
-
-
