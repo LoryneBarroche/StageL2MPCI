@@ -376,7 +376,7 @@ Proof.
     apply injective_projections.
 Qed.
 
-
+ 
 Definition vecI : Set := Z * Z. 
 
 Definition cellI : Set := Z * Z.
@@ -389,13 +389,13 @@ Definition translationI (c : cellI) (u : vecI) (k : Z) : cellI :=
 Definition is_VP (v:vecI) (P: configurationI) :=   
   forall c,  forall k,  P (translationI c v k) = P c.
 
-Definition plus_vec (u v : vecI) : vecI := (u.1 + v.1, u.2 + v.2).
+Definition sum_vec (u v : vecI) : vecI := (u.1 + v.1, u.2 + v.2).
 
-Notation "u + v" := (plus_vec u v).
+Notation "u + v" := (sum_vec u v).
 
 Lemma translationI_sum : forall c u v k, translationI c (u + v) k 
 = translationI (translationI c u k) v k.
-Proof. 
+Proof.
 intros.
 unfold translationI. simpl. apply eq_pair.
 - simpl. lia.
@@ -416,9 +416,9 @@ Notation "k * u" := (mult_vec k u).
 
 Lemma translationI_prod : forall c u k' k, translationI c (k'*u) k = translationI c u (k * k').
 Proof.
-intros. destruct c as [x y]. destruct u as [u1 u2].
-unfold translationI. simpl. 
-rewrite Z.mul_assoc. rewrite Z.mul_assoc. reflexivity.
+intros. unfold translationI. simpl. apply eq_pair.
+- simpl. lia.
+- simpl. lia.
 Qed.
 
 Lemma prod_VP : forall P u k, is_VP u P -> is_VP (k * u) P.
@@ -433,7 +433,7 @@ Proof.
 intros. intro. apply (H0 (u.1 - u.2)). lia. 
 replace (u.1 - u.2, 0) with (u + (-u.2) * (1,1)).
 - eapply sum_VP. exact H2. eapply prod_VP. exact H.
-- unfold plus_vec. unfold mult_vec. simpl. apply injective_projections.
+- unfold sum_vec. unfold mult_vec. simpl. apply injective_projections.
   + simpl. lia.
   + simpl. lia.
 Qed. 
@@ -455,7 +455,7 @@ intros. destruct H as [u [Hu [v [Hv [Hnc [HuVP HvVP]]]]]].
   replace (v.2 * u.1 - u.2 * v.1, 0) with (v.2 * u + (-u.2) * v). 
   - eapply sum_VP. eapply prod_VP. exact HuVP. 
     eapply prod_VP. exact HvVP. 
-  - unfold plus_vec. unfold mult_vec. simpl.
+  - unfold sum_vec. unfold mult_vec. simpl.
     apply injective_projections.
     + simpl. lia. 
     + simpl. lia. 
