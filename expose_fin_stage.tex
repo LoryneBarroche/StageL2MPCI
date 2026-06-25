@@ -8,8 +8,18 @@
 \useoutertheme{infolines}
 \usepackage{graphicx, tikz}
 \usepackage{comment}
-
-
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems}
+\newtcbtheorem
+  []% init options
+  {thm}% name
+  {Théorème}% title
+  {%
+    colback=grey!6,
+    colframe=grey!20,
+    fonttitle=\bfseries,
+  }% options
+  {thm}% prefix
 
 \usepackage[utf8]{inputenc} % clavier et acccent
 \usepackage[french]{babel} % langue francaise
@@ -19,7 +29,7 @@
 \usepackage{geometry} % package pour définir la zone du texte
 \usepackage{fancyhdr} % package pour charger le style de la mise en page
 %\usepackage{amsfonts} % des symboles
-\usepackage{pst-labo}% schémat labo 
+\usepackage{pst-labo}% schéma labo 
 \usepackage{amssymb}%  des symboles mathématiques
 \usepackage{amsmath} % des symboles mathématiques
 \usepackage{mathtools}
@@ -72,7 +82,7 @@
 }
 
 
-\title[Du Rocq et des pavages]{Apprentissage de Rocq en commençant à formaliser un résultat sur les pavages}
+\title[Du Rocq et des pavages]{Apprentissage de Rocq en formalisant des résultat sur les pavages}
 
 \author[L. BARROCHE]{Loryne BARROCHE}
 
@@ -138,9 +148,10 @@
 \frametitle{Pavage du plan avec des tuiles de Wang}
 
 \begin{itemize}
-    \item \textbf{Pavage du plan} = un ensemble de portions du plan recouvrant le plan tout entier sans interstices ni chevauchements\\
-    \item \textbf{Tuiles de Wang} = des carrés de longueur 1 définies par la couleur de chacun de ses côtés. Un ensemble fini de tuiles de Wang sera noté $\tau$.\\
-    \item \textbf{Pavage du plan avec des tuiles de Wang} = une fonction $P_{2D} : \Z^2 \rightarrow \tau$ qui est "valide" (= compatibilité et recouvrement du plan).
+    \item \textbf{Pavage du plan :}  un ensemble de portions du plan recouvrant le plan tout entier sans interstices ni chevauchements\\
+    \item \textbf{Tuiles de Wang :}  des carrés de longueur 1 définies par la couleur de chacun de ses côtés. Un ensemble fini de tuiles de Wang sera noté $\tau$.\\
+    \item \textbf{Configuration :}  une fonction $P : \Z^2 \to \tau$ \\
+    \item \textbf{Pavage du plan avec des tuiles de Wang :}   une configuration $P$ qui est \guillemotleft valide \guillemotright (c-à-d recouvrement du plan et compatibilité).
 \end{itemize}
 \end{frame}
 
@@ -148,9 +159,9 @@
 \begin{frame}
 \frametitle{Périodicité sur les pavages de Wang}
     \begin{itemize}
-        \item  On dit que $P_{2D} : \Z^2 \rightarrow \tau$ est \textbf{faiblement périodique} ssi $\exists \Vec{u} = (x_u, y_u) \neq \Vec{0}$, $(x_u, y_u) \in \Z^2$, $\forall x \in \Z^2$, $\forall k \in \Z$, {$P_{2D}(x+k\Vec{u}) = P_{2D}(x)$}\\
-        On dit que $\Vec{u}$ est un vecteur de périodicité de $P_{2D}$.
-        \item On dit que $P_{2D} : \Z^2 \rightarrow \tau$ est \textbf{fortement périodique} si et seulement si il existe $\Vec{u} = (x_u, y_u), \Vec{v} = (x_v, y_v)$ deux vecteurs de périodicité de $P_{2D}$ non colinéaires.
+        \item  $P : \Z^2 \rightarrow \tau$ est \textbf{faiblement périodique} ssi $$\exists \Vec{u}  \in \Z^2 \setminus \{\begin{pmatrix} 0 \\ 0 \end{pmatrix}\} , \forall x \in \Z^2, \forall k \in \Z, P(x+k\Vec{u}) = P(x)$$\\
+        $\Vec{u}$ est un vecteur de périodicité de $P$.
+        \item $P : \Z^2 \rightarrow \tau$ est \textbf{fortement périodique} si et seulement si il existe $\Vec{u}$ et $\Vec{v}$ deux vecteurs de périodicité de $P$ non colinéaires.
     \end{itemize}
 
 \pause
@@ -159,32 +170,31 @@ A-t-on fortement périodique $\Leftrightarrow$ faiblement périodique ?\\
 Le sens $\Rightarrow$ est évident par définition, mais le sens $\Leftarrow$ l'est beaucoup moins.
 \end{frame}
 
+\begin{frame}{Premiers résultats en rocq}
 
+\begin{thm}{}{}
+Si $P$ est une configuration admettant $\begin{pmatrix} 1 \\ 1 \end{pmatrix}$ comme vecteur de périodicité
+et telle que tout vecteur colinéaire à $\begin{pmatrix} 1 \\ 0 \end{pmatrix}$ n'est pas un vecteur de
+périodicité, alors P n'est pas fortement périodique.
+\end{thm}
+
+\pause
+
+\begin{thm}{}{}
+Si $P$ est fortement périodique, alors il admet un vecteur de périodicité colinéaire à $\begin{pmatrix} 1 \\ 0 \end{pmatrix}$.
+\end{thm}
+
+\end{frame}
 
 
 \begin{frame}
 
     \frametitle{Théorème}
+    
+\begin{thm}{}{}
 Soit $\tau$ un jeu fini de tuiles de Wang en deux dimensions.\\
-$\exists P_{2D} : \Z^2 \rightarrow \tau$ valide, $P_{2D}$ faiblement périodique ssi $\exists P_{2D}^D : \Z^2 \rightarrow \tau$ valide, $P_{2D}^D$ fortement périodique. \\ 
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Jeu de tuiles de Wang (non formalisé)}
-\NiceMatrixOptions{renew-dots,renew-matrix}
-Soit $P_{2D} : \Z^2 \rightarrow \tau$. On forme un \textbf{jeu de tuiles de Wang} de longueur $l+1$ et de hauteur $h+1$ $T_{l+1, h+1}(\tau)$. Il est de la forme : 
-$$
-T_{l+1, h+1}(\tau) = 
-\begin{bmatrix}
-t_{h,0} & \Cdots & t_{h,j} & \Cdots & t_{h,l}\\
-\Vdots &  & \Vdots &  & \Vdots\\
-t_{i, 0} & \Cdots & t_{i,j} & \Cdots & t_{i,l}\\
-\Vdots &  & \Vdots &  & \Vdots\\
-t_{0,0} & \Cdots & t_{0,j} & \Cdots & t_{0,l}
-\end{bmatrix}
-$$ \\
-On note le pavage (compatibilité + recouvrement) d'une droite par un jeu de tuiles de Wang $T_{l+1, h+1}(\tau)$ avec l'application $P_{1D}^T : \Z \rightarrow T_{l+1, h+1}(\tau)$. 
+$\exists P : \Z^2 \rightarrow \tau$ valide, $P$ faiblement périodique ssi $\exists P_D : \Z^2 \rightarrow \tau$ valide, $P_D$ fortement périodique. \\ 
+\end{thm}
 \end{frame}
 
 \end{document}
