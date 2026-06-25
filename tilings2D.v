@@ -361,6 +361,7 @@ Definition compatible1D (P : configuration1D) (C1 C2 : cell1D) : bool :=
   | None => true
   end. 
 
+(* attention : valid_tiling est faux je crois car on ne vérifie pas valid_configuration*)
 
 Definition valid_tiling1D (P:configuration1D): Prop := 
   forall C1 C2, compatible1D P C1 C2.
@@ -370,6 +371,7 @@ Definition valid_tiling1D (P:configuration1D): Prop :=
 (****************************************************************************************)
 (**********************************Counter example***************************************)
 (****************************************************************************************)
+ 
 
 Lemma eq_pair : forall u v : (Z * Z), u.1 = v.1 -> u.2 = v.2 -> u = v.
 Proof.
@@ -377,86 +379,100 @@ Proof.
 Qed.
 
  
-Definition vecI : Set := Z * Z. 
+Definition vect : Set := Z * Z. 
 
-Definition cellI : Set := Z * Z.
 
-Definition configurationI := cellI -> tile.
+Definition add_vect (u v : vect) : vect := (u.1 + v.1, u.2 + v.2).
 
-Definition translationI (c : cellI) (u : vecI) (k : Z) : cellI :=
-       (c.1 + k * u.1 , c.2 + k * u.2).
+Notation "u +' v" := (add_vect u v) (at level 75).
 
-Definition is_VP (v:vecI) (P: configurationI) :=   
-  forall c,  forall k,  P (translationI c v k) = P c.
 
-Definition sum_vec (u v : vecI) : vecI := (u.1 + v.1, u.2 + v.2).
+Definition mult_vect (k:Z) (u : vect) : vect := (k * u.1,k * u.2).
 
-Notation "u + v" := (sum_vec u v).
+Notation "k *' u" := (mult_vect k u) (at level 70).
 
-Lemma translationI_sum : forall c u v k, translationI c (u + v) k 
-= translationI (translationI c u k) v k.
+Definition pos : Set := Z * Z.
+
+Definition config := pos -> tile.
+
+Definition translat (x : pos) (u : vect) (k : Z) : pos :=
+       (x.1 + k * u.1 , x.2 + k * u.2).
+
+       
+Definition is_VP (v:vect) (P: config) :=   
+  forall x,  forall k,  P (translat x v k) = P x.
+
+
+Lemma translat_add : forall x u v k, translat x (u +' v) k 
+= translat (translat x u k) v k.
 Proof.
 intros.
-unfold translationI. simpl. apply eq_pair.
+unfold translat. simpl. apply eq_pair.
 - simpl. lia.
 - simpl. lia.
 Qed.
 
-Lemma sum_VP : forall P u v, is_VP u P -> is_VP v P -> is_VP (u + v) P.
+Lemma add_VP : forall P u v, is_VP u P -> is_VP v P -> is_VP (u +' v) P.
 Proof.
 intros.
 unfold is_VP. intros.
-rewrite translationI_sum.
+rewrite translat_add.
 unfold is_VP in H. rewrite H0. rewrite H. reflexivity.
 Qed.
 
-Definition mult_vec (k:Z) (u : vecI) : vecI := (k * u.1,k * u.2).
 
-Notation "k * u" := (mult_vec k u).
-
-Lemma translationI_prod : forall c u k' k, translationI c (k'*u) k = translationI c u (k * k').
+Lemma translat_mult : forall x u k1 k2, translat x (k1 *' u) k2 = translat x u (k1 * k2).
 Proof.
-intros. unfold translationI. simpl. apply eq_pair.
+intros. unfold translat. simpl. apply eq_pair.
 - simpl. lia.
 - simpl. lia.
 Qed.
 
-Lemma prod_VP : forall P u k, is_VP u P -> is_VP (k * u) P.
+Lemma mult_VP : forall P u k, is_VP u P -> is_VP (k *' u) P.
 Proof.
 intros. unfold is_VP. intros.
-unfold is_VP in H. rewrite translationI_prod. rewrite H. reflexivity.
+unfold is_VP in H. rewrite translat_mult. rewrite H. reflexivity.
 Qed.
 
-Lemma counter_example : forall P : configurationI, is_VP (1,1) P 
--> (forall a, a <> 0 -> not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
+Lemma cl_r_VP : forall P u v k, is_VP u P -> is_VP v P -> is_VP (u +' k *' v) P.
 Proof.
-intros. intro. apply (H0 (u.1 - u.2)). lia. 
-replace (u.1 - u.2, 0) with (u + (-u.2) * (1,1)).
-- eapply sum_VP. exact H2. eapply prod_VP. exact H.
-- unfold sum_vec. unfold mult_vec. simpl. apply injective_projections.
+intros. apply add_VP. exact H. apply mult_VP. exact H0.
+Qed.
+
+Lemma counter_example : forall P : config, is_VP (1,1) P 
+-> (forall a, a <> 0 -> not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
+Proof.  
+intros. unfold not. intro. 
+unfold not in H0. apply (H0 (u.1 - u.2)). lia. 
+replace (u.1 - u.2, 0) with (u +' (-u.2) *' (1,1)).
+- apply cl_r_VP. exact H2. exact H.
+- unfold add_vect. unfold mult_vect. simpl. apply eq_pair.
   + simpl. lia.
   + simpl. lia.
 Qed. 
 
-(** we prove that if P is Sp then it has a VP colinear with (1,0)**)
+(** we prove that if P is SP then it has a VP colinear with (1,0)**)
       
-Definition SP (P:configurationI): Prop :=
+Definition SP (P:config): Prop :=
   exists u, u <> (0,0) /\ 
     exists v, 
       v <> (0,0) /\ (v.2 *  u.1 -  u.2 *  v.1 <> 0) /\ 
        is_VP u P /\ is_VP v P.
 
+Lemma cl_VP : forall P u v k1 k2, is_VP u P -> is_VP v P -> is_VP (k1 *' u +' k2 *' v) P.
+Proof.
+intros. apply add_VP. apply mult_VP. exact H. apply mult_VP. exact H0.
+Qed.
 
 Lemma SP_to_VP : forall P, SP P -> exists a, a<> 0 /\ is_VP (a,0) P.
 Proof.
 intros. destruct H as [u [Hu [v [Hv [Hnc [HuVP HvVP]]]]]].
   exists (v.2 * u.1 - u.2 * v.1).  
   split. exact Hnc. 
-  replace (v.2 * u.1 - u.2 * v.1, 0) with (v.2 * u + (-u.2) * v). 
-  - eapply sum_VP. eapply prod_VP. exact HuVP. 
-    eapply prod_VP. exact HvVP. 
-  - unfold sum_vec. unfold mult_vec. simpl.
-    apply injective_projections.
+  replace (v.2 * u.1 - u.2 * v.1, 0) with (v.2 *' u +' (-u.2) *' v). 
+  - apply cl_VP. exact HuVP. exact HvVP. 
+  - unfold add_vect. unfold mult_vect. simpl.
+    apply eq_pair.
     + simpl. lia. 
     + simpl. lia. 
 Qed. 
