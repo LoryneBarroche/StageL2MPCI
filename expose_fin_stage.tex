@@ -18,7 +18,7 @@
 \makenomenclature
 \usepackage{geometry} % package pour définir la zone du texte
 \usepackage{fancyhdr} % package pour charger le style de la mise en page
-\usepackage{amsfonts} % des symboles
+%\usepackage{amsfonts} % des symboles
 \usepackage{pst-labo}% schémat labo 
 \usepackage{amssymb}%  des symboles mathématiques
 \usepackage{amsmath} % des symboles mathématiques
@@ -29,7 +29,7 @@
 \usepackage{multicol}  % pour écrire en plusieurs colonnes
 \usepackage{pdfpages}
 \usepackage{color}  % pour écrire en couleur
-\usepackage{enumitem}
+%\usepackage{enumitem}
 \usepackage{parskip}
 \usepackage{amsthm}
 \usepackage{hyperref} %pour insérer liens 
@@ -72,13 +72,13 @@
 }
 
 
-\title{Formalisation d'un résultat sur les pavages en Rocq}
+\title[Du Rocq et des pavages]{Apprentissage de Rocq en commençant à formaliser un résultat sur les pavages}
 
 \author[L. BARROCHE]{Loryne BARROCHE}
 
 %\institute[I2M]{Institut de mathématiques de Marseille - Universit\'e d'Aix-Marseille}
 
-\institute[L2 MPCI]{L2 Mathématiques Physique Chimie Informatique - Universit\'e d'Aix-Marseille}
+\institute[L2 MPCI]{Co-encadrée par Etienne Miquey et Félix Castro}
 
 \date{Juin 2026}
 
@@ -123,130 +123,68 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{L'utilisation de Rocq pour la formalisation de résultats}
+\frametitle{Qu'est-ce que Rocq ?}
 
-%une petite présentation de ce qu'est Rocq
+\begin{itemize}
+    \item Un assistant formalisant des preuves \\
+    \item Formaliser une preuve = écrire une preuve de telle sorte à ce que chaque argument découle sans ambiguïté des faits précédents. \\
+    Formaliser $\implies$ comprendre tous les détails implicites !
+\end{itemize}
 
 \end{frame}
 
 
 \begin{frame}
+\frametitle{Pavage du plan avec des tuiles de Wang}
 
-%l'idée est de faire la démo voulue, et à des endroits où ça coince en Rocq donner des exemples de ce qu'il faut rajouter.
+\begin{itemize}
+    \item \textbf{Pavage du plan} = un ensemble de portions du plan recouvrant le plan tout entier sans interstices ni chevauchements\\
+    \item \textbf{Tuiles de Wang} = des carrés de longueur 1 définies par la couleur de chacun de ses côtés. Un ensemble fini de tuiles de Wang sera noté $\tau$.\\
+    \item \textbf{Pavage du plan avec des tuiles de Wang} = une fonction $P_{2D} : \Z^2 \rightarrow \tau$ qui est "valide" (= compatibilité et recouvrement du plan).
+\end{itemize}
+\end{frame}
 
-\begin{Definition}
-Soit $C$ un ensemble de couleurs. On définit les tuiles de Wang en deux dimensions par des tuiles carrées le longueur 1 possédant une couleur sur chaque côté. Par la suite, nous considérerons chaque tuile comme un quadruplet $w$ = (Haut, Bas, Gauche, Droite) $\in C^4$.  On note $\tau$ un ensemble fini de tuiles de Wang en deux dimensions.
-\end{Definition}
 
-\begin{Definition}
-Soient $c_{n | 1 \leq n \leq 8} \in C$. Soient $w_1 = (c_1, c_2, c_3, c_4)$ et $w_2 = (c_5, c_6, c_7, c_8)$. \\
-On dit que $w_1$ est compatible à droite avec $w_2$ si et seulement si $c_4 = c_7$. On dit aussi que $w_2$ est compatible à gauche avec $w_1$.\\
-On dit que $w_1$ est compatible en haut avec $w_2$ si et seulement si $c_1 = c_6$. On dit aussi que $w_2$ est compatible en bas avec $w_1$. \\
-On dit que $w_1$ est compatible avec $w_2$ ssi $w_1$ est compatible à droite ou en haut avec $w_2$ ssi $w_2$ est compatible à gauche ou en bas avec $w_1$. On note $w_1 \text{ } \bm{\gamma_{\tau}} \text{ } w_2$.
-\end{Definition}
+\begin{frame}
+\frametitle{Périodicité sur les pavages de Wang}
+    \begin{itemize}
+        \item  On dit que $P_{2D} : \Z^2 \rightarrow \tau$ est \textbf{faiblement périodique} ssi $\exists \Vec{u} = (x_u, y_u) \neq \Vec{0}$, $(x_u, y_u) \in \Z^2$, $\forall x \in \Z^2$, $\forall k \in \Z$, {$P_{2D}(x+k\Vec{u}) = P_{2D}(x)$}\\
+        On dit que $\Vec{u}$ est un vecteur de périodicité de $P_{2D}$.
+        \item On dit que $P_{2D} : \Z^2 \rightarrow \tau$ est \textbf{fortement périodique} si et seulement si il existe $\Vec{u} = (x_u, y_u), \Vec{v} = (x_v, y_v)$ deux vecteurs de périodicité de $P_{2D}$ non colinéaires.
+    \end{itemize}
 
-\begin{Definition}
-On dit que $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ est un pavage de $\mathds{Z}^2$ ssi $\forall x \in \mathds{Z}^2, \exists w \in \tau, P_{2D}(x) = w$. Sans perte de généralité, on peut considérer que le centre de chaque tuile a des coordonnées relatives.
-\end{Definition}
+\pause
 
-\begin{Definition}
-Soit $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ un pavage de $\mathds{Z}^2$ avec des tuiles de Wang. On dit que $P_{2D}$ est valide si et seulement si $\forall x = (x_1,x_2) \in \mathds{Z}^2, w_{(x_1, x_2)} \text{ } \bm{\gamma_{\tau}} \text{ } w_{(x_1+1, x_2)}, w_{(x_1, x_2)} \text{ } \bm{\gamma_{\tau}} \text{ } w_{(x_1-1, x_2)}, w_{(x_1, x_2)} \text{ } \bm{\gamma_{\tau}} \text{ } w_{(x_1, x_2+1)}, w_{(x_1, x_2)} \text{ } \bm{\gamma_{\tau}} \text{ } w_{(x_1, x_2-1)}$.
-\end{Definition}
+A-t-on fortement périodique $\Leftrightarrow$ faiblement périodique ?\\
+Le sens $\Rightarrow$ est évident par définition, mais le sens $\Leftarrow$ l'est beaucoup moins.
+\end{frame}
 
-\begin{Definition}
-On dit que $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ est faiblement périodique ssi $\exists \Vec{u} = (x_u, y_u) \neq \Vec{0}$, $(x_u, y_u) \in \mathds{Z}^2$, $\forall x \in \mathds{Z}^2$, $\forall k \in \mathds{Z}$, {$P_{2D}(x+k\Vec{u}) = P_{2D}(x)$}\\
-On dit que $\Vec{u}$ est un vecteur de périodicité.
-\end{Definition}
 
-\begin{Definition}
-On dit que $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ est fortement périodique ssi $\exists \Vec{u} = (x_u, y_u) \neq \Vec{0}$, $(x_u, y_u) \in \mathds{Z}^2, \exists \Vec{v} = (x_v, y_v) \neq \Vec{0}$, $(x_v, y_v) \in \mathds{Z}^2$, $\nexists a, b \in \mathds{R}$ tq $a\Vec{u} + b\Vec{v} = \Vec{0}$, et $\forall x \in \mathds{Z}^2$, $\forall k_1 \in \mathds{Z}$, $\forall k_2 \in \mathds{Z}$, $P_{2D}(x+k_1\Vec{u}+k_2\Vec{v}) = P_{2D}(x)$.
-\end{Definition}
 
+
+\begin{frame}
+
+    \frametitle{Théorème}
+Soit $\tau$ un jeu fini de tuiles de Wang en deux dimensions.\\
+$\exists P_{2D} : \Z^2 \rightarrow \tau$ valide, $P_{2D}$ faiblement périodique ssi $\exists P_{2D}^D : \Z^2 \rightarrow \tau$ valide, $P_{2D}^D$ fortement périodique. \\ 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Jeu de tuiles de Wang (non formalisé)}
 \NiceMatrixOptions{renew-dots,renew-matrix}
-
-\begin{Definition}
-Soit $P_{2D} : \mathds{Z}^2 \rightarrow \tau$. On forme un jeu de tuiles de Wang de longueur $l$ et de hauteur $h$ $T_{l, h}(\tau)$. Il est de la forme : 
+Soit $P_{2D} : \Z^2 \rightarrow \tau$. On forme un \textbf{jeu de tuiles de Wang} de longueur $l+1$ et de hauteur $h+1$ $T_{l+1, h+1}(\tau)$. Il est de la forme : 
 $$
-T_{l, h}(\tau) = 
+T_{l+1, h+1}(\tau) = 
 \begin{bmatrix}
-t_{max(0,h-1),0} & \Cdots & t_{max(0,h-1),j} & \Cdots & t_{max(0,h-1),max(0,l-1)}\\
+t_{h,0} & \Cdots & t_{h,j} & \Cdots & t_{h,l}\\
 \Vdots &  & \Vdots &  & \Vdots\\
-t_{i, 0} & \Cdots & t_{i,j} & \Cdots & t_{i,max(0,l-1)}\\
+t_{i, 0} & \Cdots & t_{i,j} & \Cdots & t_{i,l}\\
 \Vdots &  & \Vdots &  & \Vdots\\
-t_{0,0} & \Cdots & t_{0,j} & \Cdots & t_{0,max(0,l-1)}
+t_{0,0} & \Cdots & t_{0,j} & \Cdots & t_{0,l}
 \end{bmatrix}
-$$
-On note le pavage d'une droite par un jeu de tuiles de Wang $T_{l, h}(\tau)$ avec l'application $P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$
-\end{Definition}
-
-\begin{Definition}
-Soit $P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$. \\
-On dit que deux jeux de tuiles $k_1$ et $k_2$ de $T_{l, h}(\tau)$ sont compatibles lorsque $\forall 0 \leq j \leq h-1$, $(P_{1D}^T(k_1))_{max(0,l-1), j} \text{ } \bm{\gamma_{\tau}} \text{ } (P_{1D}^T(k_2))_{0, j}$. On note $ P_{1D}^T(k_1) \text{ } \bm{\gamma_{T_{l, h}(\tau)}} \text{ } P_{1D}^T(k_2)$
-\end{Definition}
-
-\begin{Propriete}
-Soit $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ valide faiblement périodique de vecteur de périodicité $\Vec{u} = (x_u, y_u)$. Soit $P_{1D}^T : \mathds{Z} \rightarrow T_{|x_u|, |y_u|}(\tau)$. Alors $\forall 0 \leq i \leq max(0, |x_u| - 1)$, $\forall 0 \leq j \leq max(0, |y_u| - 1)$, $\forall k \in \mathds{Z}
-$, $(P_{1D}^T(k))_{i,j} = P_{2D}(i + k|x_u|,j)$
-\end{Propriete}
-
-\begin{proof}
-    $(P_{1D}^T(k))_{i,j}$ revient à considérer la tuile de Wang aux coordonnées $(i,j)$ dans le $k$ème jeu de tuiles. Dans $P_{2D}$, on avance de $k|x_u|$ à partir de l'origine pour atteindre ce jeu de tuiles. Puis on sélectionne la tuile de coordonnées $(i, j)$ dans ce jeu de tuiles.
-\end{proof} %! pas ouf cette démo !
-
-\begin{Lemme}
-Soit $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ valide faiblement périodique de vecteur de périodicité $\Vec{u} = (x_u, y_u)$. Alors $P_{1D}^T : \mathds{Z} \rightarrow T_{|x_u|, |y_u|}(\tau)$ est valide.
-\end{Lemme}
-
-\begin{proof}
-    Soit $k \in \mathds{Z}$.
-    Soit $ 0 \leq j \leq y_u$.
-    D'après la propriété \ref{prop:p1dtp2d}, on a $(P_{1D}^T(k))_{|x_u|-1, j} = P_{2D}((k+1)|x_u|-1,j)$ et $(P_{1D}^T(k+1))_{0, j} = P_{2D}((k+1)|x_u|,j)$. Or, $P_{2D}$ est valide. Donc $P_{2D}((k+1)|x_u|-1,j) \text{ } \bm{\gamma_{\tau}} \text{ } P_{2D}((k+1)|x_u|,j)$. On en déduit que $(P_{1D}^T(k))_{|x_u|-1, j} \text{ } \bm{\gamma_{\tau}} \text{ } (P_{1D}^T(k+1))_{0, j}$
-    Donc $P_{1D}^T(k) \text{ } \bm{\gamma_{T_{|x_u|, |y_u|}(\tau)}} \text{ } P_{1D}^T(k+1)$.
-\end{proof}
-
-\begin{Lemme}
-$\forall P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$, $\exists k_1 \in \mathds{Z}, \exists t \in \mathds{N}^*$, $P_{1D}^T(k_1) = P_{1D}^T(k_1+t)$. 
-\end{Lemme}
-
-\begin{proof}
-    Soit $P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$. $P_{1D}^T$ pave donc $\mathds{Z}$ avec des tuiles de $T_{l, h}(\tau)$. Comme $\tau$ est un ensemble fini de tuiles de Wang, $T_{l, h}(\tau)$ est aussi un ensemble fini. D'après le principe des tiroirs en version infinie, il existe au moins une tuile $w^T \in T_{l, h}(\tau)$ qui apparaît au moins deux fois dans $P_{1D}^T$. Donc il existe une position $k$ correspondant à la position de $w^T$, et un entier non nul $t$ tels que l'on retrouve $w^T$ $t$ tuiles plus loin, c'est-à-dire tels que l'on ait $P_{1D}^T(k) = P_{1D}^T(k+t)$.
-\end{proof}
-
-\begin{Lemme}
-Soit $P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$ tq $\exists k_1 \in \mathds{Z}, \exists t \in \mathds{N}^*$, $P_{1D}^T(k_1) = P_{1D}^T(k_1+t)$. Soit $D \in T_{tl,h}(\tau)$ le jeu de tuiles de dimensions $(t*l)*h$ dont la première tuile est $k_1$. On considère le pavage composé de l'unique tuile $P_{1D}^D : \mathds{Z} \rightarrow \{D\}$, défini par $\forall k \in \mathds{Z}$, $\forall 0 \leq i_1 \leq t*max(l - 1,0)$, $\forall 0 \leq j \leq max(h-1, 0)$, on décompose $i_1$ selon sa division entière par $l$ selon $i_1 = n*l+i$, $n, i \in \mathds{N}$ tels que $(P_{1D}^D(k))_{i_1,j} = (P_{1D}^T(n*k_1))_{i,j}$. Alors $P_{1D}^D$ est valide. On dit que $D$ est un domaine fondamental.
-
-
-\end{Lemme}
-
-\begin{proof}
-
-Soit $P_{1D}^T : \mathds{Z} \rightarrow T_{l, h}(\tau)$. Soit $P_{1D}^D : \mathds{Z} \rightarrow \{D\}$. Soient $k \in \mathds{Z}$, $ 0 \leq i \leq max(l - 1,0)$, $ 0 \leq j \leq max(h-1, 0)$. Considérons les tuiles $k$ et $k+1$. Par définition, on a que $(P_{1D}^D(k))_{tl-1,j} = (P_{1D}^D(k))_{(t-1)l+(l-1),j} = (P_{1D}^T(k_1 + (t-1))_{l-1,j}$ et $(P_{1D}^D(k+1))_{0,j} = (P_{1D}^D(k))_{tl,j} = (P_{1D}^T(k_1+t))_{0,j}$. Or on sait que $P_{1D}^T$ est valide, donc par le \textbf{lemme \ref{lem:Tvalide}}, on a que $P_{1D}^T(k_1 + (t-1))_{l-1,j} \text{ } \bm{\gamma_{T_{l,h}(\tau)}} \text{ } (P_{1D}^T(k_1+t))_{0,j}$. On en déduit que $(P_{1D}^D(k)) \text{ } \bm{\gamma_{T_{tl,h}(\tau)}} \text{ } (P_{1D}^D(k+1))$. Donc $P_{1D}^D$ est valide.
-\end{proof}
-
-Remarque : le pavage $P_{1D}^D$ est périodique de période $t$.
-
-
-
-
-
-
-%$(P_{1D}^D(k))_{i,j} = P_{2D}(k*l+i,j)$
-
-
-\begin{Theoreme}
-Soit $\tau$ un jeu fini de tuiles de Wang en deux dimensions.
-$\exists P_{2D} : \mathds{Z}^2 \rightarrow \tau$ valide, $P_{2D}$ faiblement périodique ssi $\exists P_{2D}' : \mathds{Z}^2 \rightarrow \tau$ valide, $P_{2D}'$ fortement périodique.
-\end{Theoreme}
-
-\begin{proof}
-    ($\Rightarrow$) Soit $P_{2D} : \mathds{Z}^2 \rightarrow \tau$ valide. Supposons que $P_{2D}$ faiblement périodique. D'après la \textbf{définition \ref{def:FaP}}, $\exists \Vec{u} = (x_u, y_u)$ un vecteur de périodicité. D'après le  \textbf{lemme \ref{lem:Tvalide}}, $P_{1D}^T : \mathds{Z} \rightarrow T_{|x_u|, |y_u|}(\tau)$ est valide. De plus, d'après le \textbf{lemme \ref{lem:Tperiode}}, $\exists k \in \mathds{Z} \exists t \in \mathds{N}^*, P_{1D}^T(k) = P_{1D}^T(k+t)$.\\
-    - Si $y_u \neq 0$. !!!!!!!!!!!!!!!!! vérifier que tout ce qui est dit avant n'a pas besoin de cette hypothèse !!!!!!!!!!!!!!! Posons $\Vec{v} = (t|x_u|,0)$. Soit $D \in T_{t|x_u|, |y_u|}(\tau)$. Soit $P_{1D}^D : \mathds{Z} \rightarrow \{D\}$. Soient $0 \leq i \leq max(t|x_u| - 1,0)$ et $0 \leq j \leq max(|y_u|-1, 0)$. Soient $k_1, k_2 \in \mathds{Z}$. On pose $P_{2D}' : \mathds{Z}^2 \rightarrow \tau$ tq $P_{2D}'((i,j)+k_1\Vec{u}+k_2\Vec{v}) = (P_{1D}^D(x))_{i,j} \forall x \in \mathds{Z}$. Soit $x = (x_1, x_2) \in \mathds{Z}^2$. On décompose les coordonnées de $x$ selon $x_1 = k_{1x}(t|x_u|)+i$ et $x_2 = k_{2x}|y_u|+j$ avec $k_{1x} \in \mathds{Z}$, $k_{2x} \in \mathds{Z}$, $0 \leq i \leq max(t|x_u| - 1,0)$ et $0 \leq j \leq max(|y_u|-1, 0)$. On a alors $x=(i,j)+k_{1x}\Vec{u}+k_{2x}\Vec{v}$. On en déduit que $P_{2D}'(x+k_1\Vec{u}+k_2\Vec{v}) = P_{2D}'((i,j)+(k_{1x}+k_1)\Vec{u}+(k_{2x} + k_2)\Vec{v}) = P_{2D}'(i,j) = P_{2D}'(x)$. Donc $P_{2D}'$ est fortement périodique. De plus, il est valide selon $\Vec{u}$ par hypothèse, et selon $\Vec{v}$ d'après le \textbf{lemme \ref{lem:fondadomain}}. Donc $P_{2D}'(x)$ est valide.
-    - Si $y_u = 0$.
-    \newline
-    ($\Leftarrow$) 
-\end{proof}
-    
-
+$$ \\
+On note le pavage (compatibilité + recouvrement) d'une droite par un jeu de tuiles de Wang $T_{l+1, h+1}(\tau)$ avec l'application $P_{1D}^T : \Z \rightarrow T_{l+1, h+1}(\tau)$. 
 \end{frame}
 
 \end{document}
