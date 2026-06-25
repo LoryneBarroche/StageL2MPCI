@@ -366,21 +366,27 @@ Definition valid_tiling1D (P:configuration1D): Prop :=
   forall C1 C2, compatible1D P C1 C2.
 
 
-      
+
 (****************************************************************************************)
 (**********************************Counter example***************************************)
 (****************************************************************************************)
 
+Lemma eq_pair : forall u v : (Z * Z), u.1 = v.1 -> u.2 = v.2 -> u = v.
+Proof.
+    apply injective_projections.
+Qed.
+
+
 Definition vecI : Set := Z * Z. 
 
+Definition cellI : Set := Z * Z.
 
-Definition translationI (c : cell) (u : vecI) (k : Z) : cell :=
-  match c with
-  | C x y =>
-      C (x + k * u.1) (y + k * u.2)
-  end.
+Definition configurationI := cellI -> tile.
 
-Definition is_VP (v:vecI) (P: configuration) :=   
+Definition translationI (c : cellI) (u : vecI) (k : Z) : cellI :=
+       (c.1 + k * u.1 , c.2 + k * u.2).
+
+Definition is_VP (v:vecI) (P: configurationI) :=   
   forall c,  forall k,  P (translationI c v k) = P c.
 
 Definition plus_vec (u v : vecI) : vecI := (u.1 + v.1, u.2 + v.2).
@@ -390,11 +396,10 @@ Notation "u + v" := (plus_vec u v).
 Lemma translationI_sum : forall c u v k, translationI c (u + v) k 
 = translationI (translationI c u k) v k.
 Proof. 
-intros. destruct c as [x y]. destruct u as [u1 u2]. destruct v as [v1 v2].
-unfold translationI. simpl.
-rewrite Z.mul_add_distr_l. rewrite Z.mul_add_distr_l.
-rewrite Z.add_assoc. rewrite Z.add_assoc.
-reflexivity.
+intros.
+unfold translationI. simpl. apply eq_pair.
+- simpl. lia.
+- simpl. lia.
 Qed.
 
 Lemma sum_VP : forall P u v, is_VP u P -> is_VP v P -> is_VP (u + v) P.
@@ -412,7 +417,7 @@ Notation "k * u" := (mult_vec k u).
 Lemma translationI_prod : forall c u k' k, translationI c (k'*u) k = translationI c u (k * k').
 Proof.
 intros. destruct c as [x y]. destruct u as [u1 u2].
-unfold translationI. simpl.
+unfold translationI. simpl. 
 rewrite Z.mul_assoc. rewrite Z.mul_assoc. reflexivity.
 Qed.
 
@@ -422,24 +427,36 @@ intros. unfold is_VP. intros.
 unfold is_VP in H. rewrite translationI_prod. rewrite H. reflexivity.
 Qed.
 
-Lemma counter_example : forall P : configuration, is_VP (1,1) P 
+Lemma counter_example : forall P : configurationI, is_VP (1,1) P 
 -> (forall a, a <> 0 -> not (is_VP (a ,0) P)) -> forall u, (u.1) <> (u.2) -> not(is_VP u P). 
 Proof.
-intros. intro. unfold is_VP in H2. 
-Admitted.
+intros. intro. apply (H0 (u.1 - u.2)). lia. 
+replace (u.1 - u.2, 0) with (u + (-u.2) * (1,1)).
+- eapply sum_VP. exact H2. eapply prod_VP. exact H.
+- unfold plus_vec. unfold mult_vec. simpl. apply injective_projections.
+  + simpl. lia.
+  + simpl. lia.
+Qed. 
 
-(** next goal**)
-      (*I took your definition of strong periodicity that I barely changed*)
-Definition SP (P:configuration): Prop :=
+(** we prove that if P is Sp then it has a VP colinear with (1,0)**)
+      
+Definition SP (P:configurationI): Prop :=
   exists u, u <> (0,0) /\ 
     exists v, 
       v <> (0,0) /\ (v.2 *  u.1 -  u.2 *  v.1 <> 0) /\ 
        is_VP u P /\ is_VP v P.
 
-Lemma addprod_VP : forall P u v k, is_VP u P -> is_VP v P -> is_VP (u + k *v) P.
-      
+
 Lemma SP_to_VP : forall P, SP P -> exists a, a<> 0 /\ is_VP (a,0) P.
-
-Admitted.
-
-
+Proof.
+intros. destruct H as [u [Hu [v [Hv [Hnc [HuVP HvVP]]]]]].
+  exists (v.2 * u.1 - u.2 * v.1).  
+  split. exact Hnc. 
+  replace (v.2 * u.1 - u.2 * v.1, 0) with (v.2 * u + (-u.2) * v). 
+  - eapply sum_VP. eapply prod_VP. exact HuVP. 
+    eapply prod_VP. exact HvVP. 
+  - unfold plus_vec. unfold mult_vec. simpl.
+    apply injective_projections.
+    + simpl. lia. 
+    + simpl. lia. 
+Qed. 
